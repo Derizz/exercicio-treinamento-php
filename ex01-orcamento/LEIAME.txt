@@ -1,0 +1,60 @@
+LABORATÓRIO DE NÚMEROS
+
+L1: 4.90 * 30
+- Resultado obtido: float(147)
+- Por que aconteceu (conceito): Operação aritmética de multiplicação entre float e int, mantendo o resultado numérico em ponto flutuante (sem zeros à direita na representação interna) antes da formatação em reais com number_format.
+
+L2: 0.1 + 0.2 == 0.3
+- Resultado obtido: bool(false)
+- Por que aconteceu (conceito): Imprecisão de ponto flutuante em binário (padrão IEEE 754). Decimais exatos na base 10 como 0.1 e 0.2 não têm representação finita em binário, fazendo com que 0.1 + 0.2 resulte em 0.30000000000000004, que difere de 0.3 na comparação.
+
+L3: (int) (19.99 * 100)
+- Resultado obtido: int(1998)
+- Por que aconteceu (conceito): Imprecisão de ponto flutuante combinada com coerção/conversão explícita para int (truncamento). Na memória binária, 19.99 * 100 vale aproximadamente 1998.9999999999998; o cast (int) apenas descarta a parte fracionária sem arredondar, resultando em 1998 e perdendo 1 centavo.
+
+L4: (int) round(19.99 * 100)
+- Resultado obtido: int(1999)
+- Por que aconteceu (conceito): Arredondamento antes da conversão de tipo. A função round() ajusta o float para o inteiro mais próximo (1999.0) antes de o cast (int) converter para inteiro, evitando a perda de centavos causada pelo truncamento.
+
+L5: (int) (267.728 * 100) e (int) round(267.728 * 100)
+- Resultado obtido: int(26772) e int(26773)
+- Por que aconteceu (conceito): Diferença entre truncamento e arredondamento. O produto 267.728 * 100 gera 26772.8: o cast (int) corta o .8 e devolve 26772, enquanto round() arredonda para cima por causa da casa decimal >= 5, devolvendo 26773.
+
+L6: intdiv(26773, 3) e 26773 % 3
+- Resultado obtido: int(8924) e int(1)
+- Por que aconteceu (conceito): Divisão inteira e operador de módulo (resto). intdiv() retorna apenas o quociente inteiro da divisão (8924 centavos por parcela base), enquanto % retorna o resto inteiro que sobrou da divisão (1 centavo).
+
+L7: 10 / 4, 10 / 5 e 10 % 4
+- Resultado obtido: float(2.5), float(2) e int(2)
+- Por que aconteceu (conceito): Comportamento dos operadores aritméticos de divisão. No PHP, o operador / realiza divisão real e sempre devolve float (mesmo quando o resultado é exato, como 10 / 5 -> float(2)), enquanto o operador % realiza o resto da divisão inteira e devolve int.
+
+Por que parcelar em centavos inteiros em vez de dividir float por 3 e arredondar?
+- Dividir um float diretamente por 3 e arredondar cada parcela separadamente (como R$ 267,73 / 3 = R$ 89,2433..., arredondado para R$ 89,24 em todas as parcelas) faz com que a soma das parcelas (3 × R$ 89,24 = R$ 267,72) fique diferente do total real do pedido, perdendo ou ganhando centavos por causa do arredondamento repetido e da imprecisão binária de ponto flutuante. Ao converter o total para centavos inteiros com (int) round($total * 100) e usar divisão inteira (intdiv) com resto (%), distribuímos o resto exato na primeira parcela e garantimos matematicamente que a soma das parcelas seja idêntica ao total cobrado.
+
+O QUE O PROGRAMA FAZ
+Calcula o orçamento de um pedido para a loja Café & Cia Embalagens a partir de variáveis e constantes definidas no topo do arquivo orcamento.php, exibindo os valores por item, descontos, frete, total, peso, dúzias do primeiro item, parcelamento em centavos inteiros com conferência, resumo em heredoc e o laboratório de números.
+
+COMO ABRIR
+Com o Apache rodando no XAMPP, acesse http://localhost:8080/ex01-orcamento/orcamento.php (ou http://localhost/ex01-orcamento/orcamento.php, conforme a porta configurada no Apache) com a exibição de erros ligada[cite: 2, 4, 7].
+
+DECISÕES TOMADAS
+- Todos os cálculos foram feitos no topo do arquivo usando valores numéricos crus (float e int) e constantes (const), deixando a formatação com number_format apenas na exibição HTML.
+- O parcelamento foi calculado em centavos inteiros com (int) round($total * 100), intdiv e %, atribuindo o resto à 1ª parcela e calculando a quantidade das demais parcelas a partir de PARCELAS.
+- Textos vindos de variáveis exibidos no HTML (como o nome do cliente e os nomes dos itens) passam por htmlspecialchars(..., ENT_QUOTES, 'UTF-8')
+
+TESTE DE ROBUSTEZ — CONJUNTO B
+Alterando apenas as variáveis dos itens e as constantes (preços 10.00, 2.50 e 100.00; quantidades 3, 4 e 1; pesos 0.5, 0.1 e 2.0; desconto de 10%; frete de 15.00; 3 parcelas), os resultados conferiram com o esperado:
+- Subtotais dos itens: R$ 30,00 · R$ 10,00 · R$ 100,00
+- Subtotal geral · desconto · com desconto: R$ 140,00 · R$ 14,00 · R$ 126,00
+- Total: R$ 141,00
+- Itens · peso · preço médio: 8 · 3,9 kg · R$ 17,50
+- Item 1 em dúzias: 0 dúzias completas e 3 soltas
+- Parcelas: 1ª R$ 47,00 · demais 2: R$ 47,00
+
+FALHA ESPERADA (TODAS AS QUANTIDADES IGUAIS A 0)
+- Erro/exceção ocorrido: DivisionByZeroError (divisão por zero).
+- Linha: linha do cálculo do preço médio por item ($subtotalGeral / $quantidadeTotal).
+- Por que aconteceu: ao definir todas as quantidades como 0, a soma $quantidadeTotal resulta em 0; como a divisão por zero é indefinida, a operação $subtotalGeral / $quantidadeTotal falha e não foi corrigida conforme a instrução do teste.
+
+O QUE NÃO FICOU PRONTO
+- Nada pendente nos requisitos obrigatórios do Exercício 1 (a falha com quantidades zeradas foi mantida propositalmente conforme o teste de robustez).
