@@ -58,3 +58,4 @@ FALHA ESPERADA (TODAS AS QUANTIDADES IGUAIS A 0)
 
 O QUE NÃO FICOU PRONTO
 - Nada pendente nos requisitos obrigatórios do Exercício 1 (a falha com quantidades zeradas foi mantida propositalmente conforme o teste de robustez).
+Atualizacao de revisao concluida.
