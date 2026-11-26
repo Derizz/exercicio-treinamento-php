@@ -33,5 +33,5 @@ O projeto é organizado por exercício, cada um com seu script principal, docume
 
 ## Observação sobre o Repositório
 
-- Repositório no GitHub: `https://github.com/Derizz/exercicio-treinamento-php`[cite: 9]
-- Cada pasta contém um arquivo `LEIAME.txt` com decisões técnicas, como abrir a página em `localhost`, respostas às perguntas do exercício e observações de teste[cite: 10].
+- Repositório no GitHub: `https://github.com/Derizz/exercicio-treinamento-php`.
+- Cada pasta contém um arquivo `LEIAME.txt` com decisões técnicas, como abrir a página em `localhost`, respostas às perguntas do exercício e observações de teste.
