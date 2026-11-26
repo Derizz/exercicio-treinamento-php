@@ -1,0 +1,41 @@
+EXERCÍCIO 3 - CALCULADORA DE FRETE
+
+O que o programa faz e como abrir:
+
+Este arquivo reúne as funções de cálculo de frete e uma página web de validação automática. A partir do peso, da região de entrega, do valor do pedido e da opção de envio expresso, o sistema valida os dados, aplica as faixas de peso e multiplicadores regionais, verifica o direito a frete grátis e retorna o valor final arredondado, o prazo estimado em dias úteis e uma mensagem pronta para exibição. Na própria página, o código executa uma bateria de 23 casos de teste com resumo de acertos e um simulador de 5 pedidos reais.
+
+Para abrir no navegador (com Apache/XAMPP ou servidor embutido do PHP ativo):
+http://localhost/ex03-frete/frete.php
+(ou http://localhost:8080/ex03-frete/frete.php, conforme a porta configurada no seu servidor local).
+
+Decisões de implementação:
+- Ordem de validação (peso, região e valor do pedido): optei por validar primeiro o peso, porque é a condição física básica para o transporte existir. Depois valido a região (já normalizada), já que multiplicador, prazo e limite de frete grátis dependem dela. Por último verifico se o valor do pedido não é negativo. Cada falha retorna imediatamente, evitando blocos if aninhados e deixando o fluxo direto.
+- Uso de constantes: o peso máximo (30 kg), o fator do envio expresso (1,40) e os limites de frete grátis (R$ 300,00 e R$ 500,00) foram definidos como constantes no topo do arquivo para evitar números soltos no meio da lógica.
+- Coerção de int para float com strict_types=1: mesmo com declare(strict_types=1); ativo, o PHP permite passar um inteiro (como 2) para um parâmetro tipado como float porque todo número inteiro pode ser promovido para ponto flutuante sem perder sua escala numérica; o modo estrito bloqueia apenas conversões entre tipos incompatíveis, como strings ou booleanos.
+- Separação entre cálculo e exibição: nenhuma função usa echo; todas retornam valores tipados. Toda a renderização HTML das tabelas fica no final do arquivo usando foreach e htmlspecialchars(..., ENT_QUOTES, 'UTF-8').
+
+Respostas às perguntas do exercício:
+
+1 Por que o limite superior de cada faixa de peso inclui o valor (casos 2 e 4)? Qual operador de comparação você usou em cada faixa, e o que aconteceria com o outro?
+Porque a regra de negócio define faixas fechadas no limite superior ("até 1 kg", "até 5 kg", etc.), o que significa que exatamente 1,0 kg ainda pertence à primeira faixa e 5,0 kg à segunda. Por isso, usei o operador <= em cada condição do match (true). Se tivesse usado apenas <, valores exatos de fronteira como 1,0 kg (caso 2) e 5,0 kg (caso 4) escapariam da faixa correta e cairiam na faixa seguinte, cobrando um frete maior do que o devido.
+
+2 Por que o frete grátis do norte exige R$ 500,00, e como você evitou escrever esse caso com um if extra espalhado pelo código?
+A região Norte possui custo logístico e distância maiores, exigindo um valor mínimo de pedido mais alto para compensar a isenção do frete. Para não poluir a função principal com verificações espalhadas, isolei essa regra na função limiteFreteGratis(), que retorna a constante da região Norte quando a região normalizada é 'norte' e o limite padrão para todas as outras.
+
+3 Por que o pedido de R$ 400,00 expresso (caso 17) não tem frete grátis? Em qual linha do código isso é decidido?
+Porque a política de frete grátis vale exclusivamente para entregas convencionais (não expressas). Isso é decidido logo no início da verificação de gratuidade em calcularFrete(), na condição `if (!$expresso && $valorPedido >= $limiteGratis)` (por volta da linha 97 do arquivo frete.php). Como $expresso é true nesse caso, a condição falha e o sistema segue para o cálculo pago com acréscimo expresso.
+
+4 Como você garantiu que o valor é 22.00 e não 22.000000000000004?
+Mantive todas as operações intermediárias em ponto flutuante sem arredondar antes da hora e apliquei `round($valorCalculado, 2)` uma única vez sobre o resultado final. Além disso, na exibição formatei com `number_format($valorFinal, 2, ',', '.')` e, na bateria de testes, comparei os valores decimais usando tolerância (`abs($obtido - $esperado) < 0.005`) em vez de igualdade estrita entre floats.
+
+5 Por que o caso 21 (" Sul ") passa, e onde a normalização acontece?
+Ele passa porque a entrada passa pela função `normalizarRegiao()` antes de qualquer comparação ou mapeamento. Essa função aplica `trim()` para remover espaços nas extremidades e `mb_strtolower(..., 'UTF-8')` para converter letras maiúsculas em minúsculas, transformando " Sul " em "sul".
+
+6 Quais casos de teste você acrescentaria além destes 23, e por quê?
+Acrescentaria um pedido de R$ 499,99 para a região Norte na modalidade normal (para testar o limite exato de 1 centavo abaixo do frete grátis de R$ 500,00), uma entrega expressa para o Norte (para validar o arredondamento para cima de prazo ímpar: ceil(9 / 2) = 5 dias úteis) e uma região escrita inteiramente em maiúsculas com espaços extras (como "  CENTRO-OESTE  ") para reforçar a cobertura da normalização.
+
+7 Qual teste falhou primeiro na sua primeira tentativa, e o que ele revelou?
+Na primeira montagem, o ponto de maior atenção foi o caso 17 (pedido de R$ 400,00 com entrega expressa no Sudeste), que revelaria frete grátis indevido se a condição `!$expresso` não viesse junto da checagem do valor mínimo, além dos casos 17 e 18 confirmarem a necessidade de usar `ceil($prazoBase / 2)` para o prazo expresso não ser truncado pela divisão inteira.
+
+O que não ficou pronto:
+Todos os requisitos obrigatórios e os 23 casos da bateria de testes foram concluídos e validados. Os itens de bônus opcional (seguro adicional de 1% e retorno simultâneo de múltiplos erros) não foram incluídos nesta versão.

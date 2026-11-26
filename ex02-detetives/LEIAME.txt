@@ -1,0 +1,53 @@
+EXERCÍCIO 2 - DETETIVE DE ERROS
+Diário de depuração e respostas
+
+==================================================
+ O QUE O PROGRAMA FAZ E COMO ABRIR
+==================================================
+O programa lê dados de um produto (nome, GTIN, pesos, marca, descrição) e valores numéricos para exibir informações formatadas e realizar cálculos simples (peso da embalagem, quantidade de letras, soma, páginas necessárias, média e comparação de ponto flutuante), escapando a descrição para exibição segura em HTML.
+
+Como abrir via localhost (Apache/XAMPP):
+http://localhost/ex02-detetive/corrigido.php
+(ou no caminho correspondente dentro de htdocs / servidor local configurado).
+
+==================================================
+ DIÁRIO DE DEPURAÇÃO (EM ORDEM)
+==================================================
+- Passo 0: Liguei display_errors e error_reporting (ou configurei no php.ini / início do script de teste) e mantive bugs.php intacto.
+- Passo 1: Rodei `php -l bugs.php` e abri no navegador. O PHP parou no primeiro erro de sintaxe (falta de `;` na linha 4, apontada na linha seguinte).
+- Passo 2: Corrigi um defeito por vez, aplicando a menor mudança possível, adicionando `// CORREÇÃO N:` e fazendo um commit por defeito (`Corrige defeito N: ...`).
+- Passo 3: Após eliminar erros de sintaxe, avisos e erro fatal, comparei a saída linha por linha com a saída esperada para localizar os erros de lógica e o erro de segurança.
+- Passo 4: Executei os testes alterando apenas as variáveis pedidas ($itens = 4, $unidades = 30, 31 e 0, $descricao com <script>alert(1)</script> e $produto com aspas e &).
+
+==================================================
+ RESPOSTAS ÀS PERGUNTAS DO EXERCÍCIO
+==================================================
+
+1 Mensagens de erro em ordem e por que o PHP mostra uma de cada vez:
+Na fase de análise sintática (parse/compile), o parser interrompe a compilação ao encontrar o primeiro erro estrutural inválido, pois sem uma sintaxe válida ele não consegue montar a árvore de execução do restante do arquivo. Durante a execução, erros fatais (como DivisionByZeroError) também encerram o fluxo no ponto da falha; já avisos (como variável indefinida) podem aparecer durante a execução quando o script consegue prosseguir.
+(Anote aqui as mensagens exatas que apareceram no seu terminal/navegador durante o seu passo a passo.)
+
+2 Erro de sintaxe em que a linha indicada não era a linha do erro:
+Na falta de ponto e vírgula em `$produto = "Jus de pomme biologique"` (linha 4), o parser frequentemente aponta a linha seguinte (linha 5, onde começa `$gtin = ...`) porque é ali que ele percebe que uma nova instrução começou sem o término esperado da anterior.
+
+3 Defeitos sem mensagem de erro e como foram descobertos:
+Os 5 defeitos de lógica e o defeito de segurança não geraram erro ou aviso do PHP. Eles foram descobertos comparando cada linha da saída exibida com a saída esperada do enunciado, testando casos com variáveis alteradas e inspecionando o HTML gerado (código-fonte e comportamento no navegador).
+
+4 Testes para cada defeito de lógica (entrada -> saída esperada):
+- Aspas simples em 'GTIN: $gtin': entrada com $gtin = "03000123456789" -> saída esperada: `GTIN: 03000123456789` (não o texto literal `$gtin`).
+- Precedência/concatenação em `"5" . 3 + 2`: entrada `5`, `3`, `2` -> saída esperada: `10` (não `55`).
+- Contagem de bytes com strlen("pressé"): entrada `"pressé"` -> saída esperada: `6` letras (não `7` bytes em UTF-8).
+- Divisão simples em `$unidades / $porPagina`: entrada `$unidades = 31`, `$porPagina = 10` -> saída esperada: `4` páginas (não `3.1`).
+- Comparação direta de float `0.1 + 0.2 == 0.3`: entrada `0.1` e `0.2` comparados com `0.3` usando tolerância -> saída esperada: `sim`.
+
+5 Defeito mais difícil e estratégia que funcionou:
+A comparação de decimais em ponto flutuante (`0.1 + 0.2 == 0.3`) e a precedência em `"5" . 3 + 2` costumam enganar porque o código parece "óbvio" à primeira vista e não gera erro. O que funcionou foi escrever o resultado esperado antes de rodar, isolar a expressão e testar com tolerância / parênteses explícitos.
+
+6 Hábito de programação que evitaria mais defeitos:
+Testar incrementalmente com exibição de erros ligada, escrever o resultado esperado antes de executar e validar/escapar entradas e saídas (além de usar tipagem/comparações cuidadosas e revisar diffs antes de cada commit).
+
+==================================================
+ DECISÕES E O QUE NÃO FICOU PRONTO
+==================================================
+- Decisões: Mantive `bugs.php` inalterado, isolei cada correção em `corrigido.php` com comentário `// CORREÇÃO N:`, usei tolerância em ponto flutuante e `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` na saída HTML.
+- O que não ficou pronto: Conferir a formatação em 7 campos do `defeitos.txt`, fechar a tag `<pre>` e ajustar o cálculo de `$media` no `corrigido.php`, e registrar o histórico final de commits no Git.

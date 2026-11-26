@@ -1,0 +1,39 @@
+EXERCÍCIO 4 - RELATÓRIO DE PRODUTOS
+
+O que o programa faz e como abrir:
+Lê uma lista de produtos do catálogo, classifica a situação do estoque (Esgotado, Baixo ou Normal), calcula totais, médias, extremos e simulações de reposição e descontos apenas sobre os produtos ativos, exibindo uma tabela HTML do catálogo, o resumo, a reposição urgente, a simulação de descontos e uma seção de testes automatizados com resumo.
+
+Como abrir via localhost:
+http://localhost/ex04-relatorio/relatorio.php
+
+Decisões de implementação;
+- Nenhuma função pronta de manipulação de arrays foi utilizada (nada de array_sum, array_filter, array_map, max, min, usort ou array_column); todos os cálculos e buscas usam laços explícitos.
+- Todas as comparações usam operadores estritos (===, !==) ou relacionais (<, <=, >, >=), sem ==.
+- Toda saída de texto proveniente de dados passa por htmlspecialchars(..., ENT_QUOTES, 'UTF-8').
+
+Respostas às perguntas do exercício:
+
+1 Por que os acumuladores são criados antes do laço? O que aconteceria se estivessem dentro?
+Os acumuladores são inicializados antes do laço para manter o estado acumulado entre as iterações. Se fossem criados ou zerados dentro do laço, o valor seria reiniciado a cada produto e, ao final, restaria apenas o resultado da última iteração.
+
+2 Por que maisBarato não pode começar com 0? E por que não com um número muito grande?
+Começar com 0 faria qualquer preço positivo ser maior que 0, impedindo encontrar o menor preço real (ou exigindo gambiarras para zero). Começar com um número arbitrariamente grande (como PHP_INT_MAX) é frágil e depende de suposições sobre a escala dos dados; além disso, se não houver nenhum produto ativo, nenhum valor deveria existir. Usar null e inicializar com o primeiro produto ativo encontrado resolve ambos os casos de forma limpa e segura.
+
+3 Qual é a diferença entre usar continue e envolver o corpo do laço em um if? Qual deixa o código mais legível aqui?
+Usar continue encerra imediatamente a iteração atual e avança para o próximo elemento, reduzindo o nível de indentação do restante do código. Envolver todo o corpo em um if empurra toda a lógica principal para dentro de um bloco condicional. Aqui, usar continue no início para pular produtos inativos deixa o código mais plano e legível.
+
+4 O que aconteceria com lotesParaReposicao(0, 0, 30) sem a proteção do lote zero? Como você testou isso com segurança?
+Sem a proteção para $tamanhoDoLote <= 0, o estoque permaneceria em 0 (< 30) para sempre, causando um laço infinito (timeout/travamento do script). Para testar com segurança, implementei a guarda `if ($tamanhoDoLote <= 0)` antes do while, retornando 0 lotes e o estoque atual inalterado, e validei com entradas 0 e -5.
+
+5 Quantas vezes resumirProdutos percorre a lista? Seria possível percorrê-la uma única vez?
+Se usarmos break ao encontrar o primeiro produto urgente dentro do mesmo laço, o laço para cedo e não percorre os itens seguintes; já se fizermos um laço para os acumuladores/extremos e um break na busca do primeiro urgente, temos duas passadas (ou uma passada completa sem break antecipado, já que em uma lista pequena a verificação do primeiro urgente pode ser feita na primeira ocorrência durante a mesma varredura se não interromper os demais totais).
+
+6 No Dia 3, quais destas funções de laço você poderia substituir por funções prontas de lista? Cite pelo menos três.
+Com as funções de array vistas no Dia 3, seria possível substituir ou simplificar trechos de filtragem de ativos (`array_filter`), extração de preços ou nomes (`array_column` / `array_map`) e soma de valores/pesos (`array_sum`), em vez de escrever manualmente os laços de agregação.
+
+7 Qual teste falhou primeiro na sua tentativa, e o que ele revelou?
+Na validação dos casos extremos e funções de laço, os casos de borda como lote zero/negativo (`lotesParaReposicao(0, 0, 30)`), passo zero (`tabelaDeDescontos(..., 0)`) e listas vazias/sem ativos evidenciam a necessidade de guardas iniciais antes dos laços e de checar divisões por zero antes de calcular médias.
+
+O que não ficou pronto:
+
+Os requisitos obrigatórios e os testes dos conjuntos e funções de laço foram contemplados. Os bônus opcionais (ordenação por seleção em cópia da lista e cálculo do produto mais valioso em estoque) não foram implementados nesta versão.

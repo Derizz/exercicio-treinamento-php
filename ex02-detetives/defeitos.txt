@@ -1,0 +1,87 @@
+Nº: 1
+Categoria: Sintaxe
+Linha: 4
+Sintoma: Parse error / erro de sintaxe ao interpretar a linha seguinte por falta de delimitador de instrução.
+Causa: A atribuição $produto = "Jus de pomme biologique" não termina com ponto e vírgula (;), quebrando a gramática da linguagem na sequência.
+Correção: Adicionei ; ao final da linha 4 e o comentário // CORREÇÃO 1:.
+Como evitar: Revisar o fim de cada instrução e usar um editor/linter com verificação de sintaxe (php -l).
+
+Nº: 2
+Categoria: Sintaxe
+Linha: 5
+Sintoma: Erro de sintaxe / literal numérico inválido ao escrever 03000123456789.
+Causa: Um número inteiro começado por 0 indica base octal (dígitos 0 a 7), mas a sequência contém 8 e 9; além disso, códigos GTIN com zero à esquerda devem ser strings para preservar o zero inicial.
+Correção: Alterei o valor para a string "03000123456789" com // CORREÇÃO 2:.
+Como evitar: Representar códigos/identificadores com zeros à esquerda como string e evitar literais numéricos com zero inicial sem necessidade.
+
+Nº: 3
+Categoria: Sintaxe
+Linha: 6
+Sintoma: Erro de sintaxe em $pesoBruto = 1,1;.
+Causa: No código PHP, a vírgula não é separador decimal; números decimais de ponto flutuante usam ponto (.).
+Correção: Substituí 1,1 por 1.1 com // CORREÇÃO 3:.
+Como evitar: Usar sempre ponto decimal no código e formatar com vírgula apenas na apresentação (number_format).
+
+Nº: 4
+Categoria: Erro fatal
+Linha: 22
+Sintoma: DivisionByZeroError ao avaliar $soma / $itens quando $itens vale 0.
+Causa: Divisão por zero em expressão aritmética sem verificação prévia do divisor.
+Correção: Calculei $media apenas quando $itens > 0 e exibi "sem itens para calcular" quando não há itens, com // CORREÇÃO 4:.
+Como evitar: Validar divisores antes de dividir e testar cenários com zero.
+
+Nº: 5
+Categoria: Lógica
+Linha: 19
+Sintoma: Exibe 7 em vez de 6 para "Letras da palavra pressé".
+Causa: strlen() retorna o número de bytes, e em UTF-8 o caractere "é" ocupa mais de 1 byte.
+Correção: Troquei por mb_strlen("pressé", "UTF-8") com // CORREÇÃO 5:.
+Como evitar: Usar funções multibyte (mb_*) com encoding explícito em UTF-8 para contar caracteres.
+
+Nº: 6
+Categoria: Lógica
+Linha: 20
+Sintoma: Exibe 55 em vez de 10 para "Soma de 5, 3 e 2".
+Causa: A concatenação (.) e a adição (+) têm a mesma precedência e associatividade à esquerda: "5" . 3 vira "53" e depois soma 2.
+Correção: Calculei 5 + 3 + 2 diretamente com // CORREÇÃO 6:.
+Como evitar: Evitar misturar concatenação e soma sem parênteses e escrever o resultado esperado antes de rodar.
+
+Nº: 7
+Categoria: Lógica
+Linha: 21
+Sintoma: Exibe 2.5 em vez de 3 para "Páginas necessárias".
+Causa: A divisão simples ($unidades / $porPagina) produz decimal (2.5), mas páginas para acomodar itens exigem arredondamento para cima.
+Correção: Apliquei (int) ceil($unidades / $porPagina) com // CORREÇÃO 7:.
+Como evitar: Escolher a função de arredondamento de acordo com a regra de negócio e testar valores fracionários/limites.
+
+Nº: 8
+Categoria: Lógica
+Linha: 23
+Sintoma: Exibe "não" em vez de "sim" para "0,1 + 0,2 é igual a 0,3?".
+Causa: Representação binária de ponto flutuante (IEEE 754) não representa 0.1, 0.2 e 0.3 de forma exata em binário, tornando a igualdade direta (==) imprecisa.
+Correção: Comparei a diferença absoluta com uma tolerância ($epsilon = 1e-9) com // CORREÇÃO 8:.
+Como evitar: Não usar == para comparar floats diretamente; usar tolerância ou aritmética de precisão adequada.
+
+Nº: 9
+Categoria: Lógica
+Linha: 16
+Sintoma: Exibe o texto literal "GTIN: $gtin" em vez do conteúdo da variável.
+Causa: Strings delimitadas por aspas simples ('...') não realizam interpolação de variáveis.
+Correção: Troquei para aspas duplas em "GTIN: $gtin\n" com // CORREÇÃO 9:.
+Como evitar: Usar aspas duplas quando houver interpolação de variáveis ou concatenar explicitamente.
+
+Nº: 10
+Categoria: Aviso
+Linha: 17
+Sintoma: Aviso de variável indefinida para $marca (e valor ausente).
+Causa: Nomes de variáveis em PHP diferenciam maiúsculas e minúsculas ($Marca vs $marca).
+Correção: Corrigi a referência para $Marca com // CORREÇÃO 10:.
+Como evitar: Manter um padrão único de nomenclatura (como camelCase) e rodar com display_errors e error_reporting ativos.
+
+Nº: 11
+Categoria: Segurança
+Linha: 25
+Sintoma: A descrição HTML é interpretada/renderizada em vez de aparecer como texto literal com as etiquetas visíveis (e permite injeção de HTML/XSS).
+Causa: Falta de escape na saída HTML de uma variável e tag <pre> não fechada anteriormente.
+Correção: Fechei </pre> antes do parágrafo e apliquei htmlspecialchars($descricao, ENT_QUOTES, "UTF-8") com // CORREÇÃO 11a: e // CORREÇÃO 11b:.
+Como evitar: Escapar sempre com htmlspecialchars(..., ENT_QUOTES, 'UTF-8') ao inserir variáveis em HTML e validar a estrutura das tags.
